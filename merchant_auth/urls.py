@@ -15,4 +15,8 @@ urlpatterns = [
     path("merchant/get", views.GetMerchantView.as_view(), name="get_merchant"),
     path("merchant/create", views.CreateMerchantView.as_view(), name="create_merchant"),
     path("merchant/update", views.UpdateMerchantView.as_view(), name="update_merchant"),
+
+    path("application/get", views.GetApplicationView.as_view(), name="get_application"),
+    path("application/create", views.CreateApplicationView.as_view(), name="create_application"),
+    path("application/update", views.UpdateApplicationView.as_view(), name="update_application"),
 ]
