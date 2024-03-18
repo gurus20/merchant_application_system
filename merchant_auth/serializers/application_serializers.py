@@ -28,15 +28,21 @@ class CreateApplicationSerializer(serializers.ModelSerializer):
         validated_data['is_active'] = True 
         return super().create(validated_data)
     
+
 class UpdateApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
-        fields = (
-            'application_id',
+        fields = [
             'application_name',
             'website_url',
             'is_active'
-        )
+        ]
+
+        extra_kwargs = {
+            'application_name': {'required': False},
+            'website_url': {'required': False},
+            'is_active': {'required': False}
+        }
     
 class ApplicationSecretSerializer(serializers.ModelSerializer):
     class Meta:

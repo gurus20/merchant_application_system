@@ -14,6 +14,7 @@ from merchant_auth.serializers import user_serializers
 from merchant_auth.models import Application
 from merchant_auth.serializers import application_serializers
 
+
 class GetMerchantView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -42,7 +43,7 @@ class CreateMerchantView(generics.CreateAPIView):
             "email_verified": user.merchant.email_verified
         }
         return Response(data, status=status.HTTP_201_CREATED)
-    
+
 
 class UpdateMerchantView(generics.UpdateAPIView):
     serializer_class = merchant_serializers.UpdateMerchantSerializer
@@ -62,7 +63,8 @@ class GetApplicationView(APIView):
     def get(self, request):
         merchant = request.user.merchant
         applications = Application.objects.filter(merchant=merchant)
-        serializer = application_serializers.ApplicationSerializer(applications, many=True)
+        serializer = application_serializers.ApplicationSerializer(
+            applications, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -78,16 +80,34 @@ class CreateApplicationView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+
 
 class UpdateApplicationView(generics.UpdateAPIView):
-    pass
-#     serializer_class = merchant_serializers.UpdateMerchantSerializer
-#     permission_classes = [IsAuthenticated]
+    serializer_class = application_serializers.UpdateApplicationSerializer
+    permission_classes = [IsAuthenticated]
 
-#     def get_object(self):
-#         return Merchant.objects.get(user=self.request.user)
+    def get_object(self):
+        application_id = self.request.data.get('application_id')
 
-#     def perform_update(self, serializer):
-#         instance = self.get_object()
-#         serializer.save(merchant=instance)
+        if not application_id:
+            return None
+        
+        try:
+            merchant = Merchant.objects.get(user=self.request.user)
+            return Application.objects.get(merchant=merchant, application_id=application_id)
+        except Application.DoesNotExist:
+            return None
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        
+        if not instance:
+            print(instance)
+            return Response(
+                {'error': 'Application not found or invalid ID'},
+                status=status.HTTP_404_NOT_FOUND)
+
+        serializer.save(application=instance)
+        return Response(
+            {'message': 'Application updated successfully'},
+            status=status.HTTP_200_OK)
